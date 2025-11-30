@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # NL2SQL: Natural Language to SQL Translation System
 
 A comprehensive implementation of Natural Language to SQL translation using SQLCoder-7B-2 with Enhanced RAG and LoRA Fine-Tuning. This project demonstrates a systematic 3-stage approach achieving 87.5% accuracy on the Olist Brazilian E-Commerce dataset.
@@ -398,3 +399,7 @@ MIT License
 - Hugging Face for transformers library
 - Olist for the e-commerce dataset
 - Google Colab for GPU resources
+=======
+# QueryCraft-AI
+Intelligent Natural Language to SQL Translation
+>>>>>>> 002a1679880dcb59be06960bc967f33bee16e31f
