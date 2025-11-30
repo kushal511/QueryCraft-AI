@@ -392,7 +392,6 @@ MIT License
 
 ---
 
-## 🙏 Acknowledgments
 
 - Defog.ai for SQLCoder model
 - Hugging Face for transformers library
