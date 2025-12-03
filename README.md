@@ -545,8 +545,4 @@ MIT License
 - Olist for the e-commerce dataset
 - Google Colab for GPU resources
 
----
 
-## 📧 Contact
-
-For questions or issues, please open an issue in this repository.
