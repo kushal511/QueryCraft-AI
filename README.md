@@ -1,97 +1,96 @@
-
 # NL2SQL: Natural Language to SQL Translation System
 
-A comprehensive implementation of Natural Language to SQL translation using SQLCoder-7B-2 with Enhanced RAG and LoRA Fine-Tuning. This project demonstrates a systematic 3-stage approach achieving 87.5% accuracy on the Olist Brazilian E-Commerce dataset.
+A comprehensive implementation of Natural Language to SQL translation using two different approaches: **SQLCoder-7B-2** with RAG and Fine-Tuning, and **Llama-3.1-8B-Instruct** with LoRA Fine-Tuning. This project demonstrates systematic evaluation and optimization techniques for SQL generation.
 
-## 📊 Performance Overview
+---
+
+## 📊 Project Overview
+
+This repository contains two complete implementations:
+
+### 1. **NL2SQL_SQLcoder_Evaluation.ipynb** - SQLCoder-7B-2 (3-Stage Approach)
+Progressive improvement through baseline → RAG → fine-tuning
+
+### 2. **NL2SQL_Llama_8B_Complete.ipynb** - Llama-3.1-8B-Instruct
+Direct fine-tuning with curriculum learning on 1000 training examples
+
+---
+
+## 🎯 Implementation 1: SQLCoder-7B-2 (Systematic Evaluation)
+
+### Performance Results
 
 | Stage | Configuration | Easy | Medium | Hard | Overall |
 |-------|--------------|------|--------|------|---------|
 | Stage 1 | Baseline (Few-Shot) | 90.0% | 66.7% | 80.0% | **78.1%** |
-| Stage 2 | + Enhanced RAG (120 examples) | 90.0% | 83.3% | 90.0% | **87.5%** |
+| Stage 2 | + Enhanced RAG (108 examples) | 90.0% | 83.3% | 90.0% | **87.5%** |
 | Stage 3 | + Fine-Tuning (LoRA) | 90.0% | 83.3% | 90.0% | **87.5%** |
 
 **Total Improvement: +9.4%** (78.1% → 87.5%)
 
----
+### Key Features
 
-## 🎯 Why SQLCoder-7B-2?
+- **6 Prompting Techniques Evaluated**: Zero-Shot, Few-Shot, Chain-of-Thought, Self-Consistency, Self-Correction, Least-to-Most
+- **Enhanced RAG**: 108-example knowledge base (52 medium + 56 complex queries)
+- **Adaptive Retrieval**: TF-IDF with pattern matching and complexity-based selection
+- **Fine-Tuning**: LoRA with curriculum learning (186 training examples)
+- **Test Set**: 32 queries (10 easy, 12 medium, 10 hard)
 
-After comparing multiple models, SQLCoder-7B-2 was chosen for the following reasons:
-
-### Model Comparison Results
-
-| Model | Baseline | + RAG | + Fine-Tuning | Best Overall |
-|-------|----------|-------|---------------|--------------|
-| **SQLCoder-7B-2** | 78.1% | **87.5%** | **87.5%** | **87.5%** ✅ |
-| Llama-3.1-8B | 75.0% | 85.0% | 90.0% | 90.0% |
-
-### Key Advantages of SQLCoder-7B-2
+### Why SQLCoder-7B-2?
 
 1. **SQL-Specific Pre-training**: Trained specifically on SQL generation tasks
-2. **Better RAG Performance**: 87.5% vs 85.0% with RAG
-3. **Faster Inference**: Smaller model size (7B vs 8B parameters)
-4. **Lower Memory**: ~15GB vs ~20GB GPU memory
+2. **Excellent RAG Performance**: 87.5% accuracy with RAG enhancement
+3. **Faster Inference**: Smaller model size (7B parameters)
+4. **Lower Memory**: ~15GB GPU memory requirement
 5. **Stable Fine-Tuning**: Maintains performance without degradation
 6. **Production Ready**: Optimized for SQL generation tasks
 
-**Decision**: SQLCoder-7B-2 provides the best balance of accuracy, speed, and resource efficiency for SQL generation tasks.
-
 ---
 
-## 🏗️ System Architecture
+## 🎯 Implementation 2: Llama-3.1-8B-Instruct (Direct Fine-Tuning)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     User Natural Language Query              │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Complexity Detection (Rule-Based)               │
-│  • Easy: Simple counts, basic queries                        │
-│  • Medium: GROUP BY, aggregations, JOINs                     │
-│  • Hard: TOP N, HAVING, complex JOINs                        │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    Adaptive RAG Retrieval                    │
-│  • Skip RAG for easy queries (use baseline)                  │
-│  • Retrieve 3-5 examples for medium/hard queries             │
-│  • TF-IDF + Pattern matching + Exact matching                │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Fine-Tuned SQLCoder-7B-2 Model                  │
-│  • Base: SQLCoder-7B-2 (4-bit quantized)                     │
-│  • LoRA: r=16, alpha=32, dropout=0.1                         │
-│  • Context: Schema + RAG examples + Query                    │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  SQL Generation & Validation                 │
-│  • Generate SQL with retry logic (up to 3 attempts)          │
-│  • Execute and validate syntax                               │
-│  • Return results or error message                           │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    SQL Query + Results                       │
-└─────────────────────────────────────────────────────────────┘
-```
+### Performance Results
+
+| Stage | Configuration | Easy | Medium | Hard | Overall |
+|-------|--------------|------|--------|------|---------|
+| Before Fine-Tuning | Base Model | 40-60% | 0.0% | 0.0% | **13.3-20.0%** |
+| After Fine-Tuning | LoRA (3 epochs) | 90.0% | 80.0% | 60.0% | **76.7%** |
+
+**Total Improvement: +56.7-63.4%** (13.3-20.0% → 76.7%)
+
+### Key Features
+
+- **Large Training Set**: 1000 programmatically generated examples
+  - 300 easy queries (30%)
+  - 400 medium queries (40%)
+  - 300 hard queries (30%)
+- **Curriculum Learning**: Progressive training (Easy → Easy+Medium → All)
+- **LoRA Configuration**: r=16, alpha=32, 7 target modules
+- **3 Training Epochs**: ~15-20 minutes on A100 GPU
+- **Test Set**: 30 queries (10 easy, 10 medium, 10 hard)
+
+### Training Strategy
+
+**Epoch 1**: Easy queries only (300 examples)
+- Learn basic SQL patterns
+- Build foundation
+
+**Epoch 2**: Easy + Medium queries (700 examples)
+- Add complexity gradually
+- Maintain easy query performance
+
+**Epoch 3**: All queries (1000 examples)
+- Full complexity training
+- Prevent catastrophic forgetting
 
 ---
 
 ## 📁 Repository Contents
 
 ```
-├── NL2SQL_Systematic_Evaluation.ipynb    # Main implementation notebook
-├── README.md                              # This file
-└── requirements.txt                       # Python dependencies
+├── NL2SQL_SQLcoder_Evaluation.ipynb    # SQLCoder-7B-2 implementation (3-stage)
+├── NL2SQL_Llama_8B_Complete.ipynb      # Llama-3.1-8B implementation (direct fine-tuning)
+└── README.md                            # This file
 ```
 
 ---
@@ -102,8 +101,9 @@ After comparing multiple models, SQLCoder-7B-2 was chosen for the following reas
 
 - Python 3.8+
 - Google Colab with A100 GPU (recommended)
-- 15GB+ GPU memory
+- 15-20GB GPU memory
 - CUDA 11.8+
+- HuggingFace account and token
 
 ### Installation
 
@@ -114,16 +114,24 @@ pip install transformers==4.44.0 torch==2.4.0 accelerate==0.33.0 peft==0.12.0 \
     gradio==4.44.0 plotly==5.18.0 sqlparse==0.5.0
 ```
 
-### Running the Notebook
+### Running the Notebooks
 
-1. Open `NL2SQL_Systematic_Evaluation.ipynb` in Google Colab
+**For SQLCoder-7B-2:**
+1. Open `NL2SQL_SQLcoder_Evaluation.ipynb` in Google Colab
 2. Select GPU runtime (Runtime → Change runtime type → GPU → A100)
 3. Run all cells sequentially
-4. Wait for Gradio interface to launch (~30-40 minutes total)
+4. Wait for Gradio interface (~30-40 minutes total)
+
+**For Llama-3.1-8B:**
+1. Open `NL2SQL_Llama_8B_Complete.ipynb` in Google Colab
+2. Select GPU runtime (Runtime → Change runtime type → GPU → A100)
+3. Add HuggingFace token to Colab Secrets (key: `HF_TOKEN`)
+4. Run all cells sequentially
+5. Wait for training and evaluation (~20-30 minutes total)
 
 ---
 
-## 📓 Implementation Overview
+## 📓 SQLCoder-7B-2 Implementation Details
 
 ### Part 1: Installation & Configuration
 - Install dependencies
@@ -141,42 +149,42 @@ pip install transformers==4.44.0 torch==2.4.0 accelerate==0.33.0 peft==0.12.0 \
 - Memory usage: ~15GB GPU
 
 ### Part 4: Define 6 Prompting Techniques
-1. Zero-Shot: Direct question to SQL
-2. Few-Shot: 2 examples before query
-3. Chain-of-Thought: Step-by-step reasoning
-4. Self-Consistency: Generate 3 candidates, pick most common
-5. Self-Correction: Retry on failure with feedback
-6. Least-to-Most: Decompose problem into steps
+1. **Zero-Shot**: Direct question to SQL
+2. **Few-Shot**: 2 examples before query
+3. **Chain-of-Thought**: Step-by-step reasoning
+4. **Self-Consistency**: Generate 3 candidates, pick most common
+5. **Self-Correction**: Retry on failure with feedback
+6. **Least-to-Most**: Decompose problem into steps
 
 ### Part 5: Baseline Evaluation
 - Test all 6 techniques on 32 queries
 - 10 easy, 12 medium, 10 hard queries
-- Best baseline: Few-Shot (78.1%)
+- **Best baseline: Few-Shot (78.1%)**
 
 ### Part 6: Enhanced RAG Knowledge Base
-- Create 120-example knowledge base
-- 60 medium complexity queries
-- 60 hard/complex queries
+- Create 108-example knowledge base
+- 52 medium complexity queries
+- 56 hard/complex queries
 - Multiple variations for failing queries
 
 ### Part 7: RAG Retrieval & Evaluation
 - TF-IDF retrieval with bigrams
 - Pattern-specific boosting (10x for exact match)
 - Adaptive retrieval (skip RAG for easy queries)
-- Result: 87.5% (+9.4% improvement)
+- **Result: 87.5% (+9.4% improvement)**
 
 ### Part 8: Generate Training Data
-- ~200 training examples
-- 70% medium (focus area)
-- 30% hard (prevent forgetting)
+- 186 training examples
+- 73% medium (focus area)
+- 27% hard (prevent forgetting)
 - Extra emphasis on failing queries
 
 ### Part 9: Fine-Tuning with Curriculum Learning
-- Stage 1: Train on medium queries
-- Stage 2: Train on medium + hard queries
-- 2 epochs total, learning rate 5e-5
-- Training time: ~15 minutes on A100
-- Result: 87.5% (maintained)
+- Stage 1: Train on medium queries (136 examples)
+- Stage 2: Train on medium + hard queries (186 examples)
+- 1 epoch per stage, learning rate 5e-5
+- Training time: ~10-15 minutes on A100
+- **Result: 87.5% (maintained)**
 
 ### Part 10: Final Evaluation & Visualization
 - Compare all 3 stages
@@ -192,116 +200,244 @@ pip install transformers==4.44.0 torch==2.4.0 accelerate==0.33.0 peft==0.12.0 \
 
 ---
 
-## 🎯 Key Results
+## 📓 Llama-3.1-8B Implementation Details
 
-### Overall Performance
+### Part 1: Setup and Installation
+- Install dependencies with fixed versions
+- Set random seed (42) for reproducibility
 
-| Metric | Value |
-|--------|-------|
-| **Final Accuracy** | 87.5% |
-| **Total Improvement** | +9.4% |
-| **Easy Queries** | 90.0% (9/10) |
-| **Medium Queries** | 83.3% (10/12) |
-| **Hard Queries** | 90.0% (9/10) |
+### Part 2: Data Loading and Database Setup
+- Mount Google Drive
+- Load Olist Brazilian E-Commerce Dataset (8 tables)
+- Create item-level view (112,650 rows, 37 columns)
+- Get HuggingFace token from Colab Secrets
 
-### Stage-by-Stage Impact
+### Part 3: Generate Training Data
+- **1000 training examples** programmatically generated
+- 300 easy (30%): Simple counts, basic queries
+- 400 medium (40%): GROUP BY, aggregations, JOINs
+- 300 hard (30%): TOP N, HAVING, complex JOINs
 
-**Stage 1: Baseline (78.1%)**
-- Best technique: Few-Shot
-- Medium queries: 66.7% (needs improvement)
+### Part 4: Create PyTorch Dataset
+- Custom `NL2SQLDataset` class
+- Chat template formatting
+- Tokenization with padding/truncation
 
-**Stage 2: + RAG (87.5%)**
-- Improvement: +9.4%
-- Medium queries: 83.3% (+16.6%)
-- Hard queries: 90.0% (+10.0%)
+### Part 5: Load Model and Apply LoRA
+- Model: `meta-llama/Meta-Llama-3.1-8B-Instruct`
+- 4-bit quantization (NF4)
+- LoRA config: r=16, alpha=32, dropout=0.05
+- Target modules: 7 attention/MLP layers
+- **Trainable params: 41.9M (0.52% of total)**
 
-**Stage 3: + Fine-Tuning (87.5%)**
-- Maintained performance
-- No catastrophic forgetting
-- Production-ready
+### Part 5A: Evaluate BEFORE Fine-Tuning
+- Test base model on 30 queries
+- **Baseline: 13.3-20.0% overall accuracy**
+- Easy: 40-60%, Medium: 0%, Hard: 0%
+
+### Part 6: Configure Training
+- 3 epochs with curriculum learning
+- Batch size: 4, gradient accumulation: 4
+- Learning rate: 2e-4
+- Optimizer: paged_adamw_8bit
+- FP16 training
+
+### Part 7: Train Model
+- **Epoch 1**: Easy queries only (300 examples)
+- **Epoch 2**: Easy + Medium (700 examples)
+- **Epoch 3**: All queries (1000 examples)
+- Progressive difficulty increase
+- Training time: ~15-20 minutes on A100
+
+### Part 8: Evaluate AFTER Fine-Tuning
+- Test fine-tuned model on same 30 queries
+- **Final: 76.7% overall accuracy**
+- Easy: 90%, Medium: 80%, Hard: 60%
+- **Improvement: +56.7-63.4%**
+
+### Part 9: Visualizations
+- Performance comparison charts
+- Before/After comparison
+- Difficulty-level breakdown
+
+### Part 10: Interactive Gradio Interface
+- 6 prompting techniques available
+- Real-time SQL generation
+- Query library (5 categories)
+- Database schema viewer
+- Results visualization
 
 ---
 
-## 🔧 Technical Configuration
+## 🔧 Technical Configurations
 
-### Model Configuration
+### SQLCoder-7B-2 Configuration
+
+**Model:**
 ```
-Base Model: SQLCoder-7B-2
+Base Model: defog/sqlcoder-7b-2
 Parameters: 7 billion
 Quantization: 4-bit NF4
 Context Length: 512 tokens
 GPU Memory: ~15GB
 ```
 
-### LoRA Configuration
+**LoRA:**
 ```
 Rank (r): 16
 Alpha: 32
-Dropout: 0.1
+Dropout: 0.05
 Target Modules: ['q_proj', 'k_proj', 'v_proj', 'o_proj']
-Trainable Parameters: ~4.2M (0.06% of total)
+Trainable Parameters: ~16.8M (0.25% of total)
 ```
 
-### RAG Configuration
+**RAG:**
 ```
-Knowledge Base: 120 examples
-  - Medium: 60 examples
-  - Complex: 60 examples
+Knowledge Base: 108 examples
+  - Medium: 52 examples
+  - Complex: 56 examples
 Retrieval Method: TF-IDF + Pattern Matching
-Top-K: 3 examples
+Top-K: 3-5 examples
 Adaptive: Skip RAG for easy queries
 ```
 
-### Training Configuration
+**Training:**
 ```
-Training Examples: ~200
-  - Medium: 70%
-  - Hard: 30%
+Training Examples: 186
+  - Medium: 73%
+  - Hard: 27%
 Batch Size: 2 (effective 16)
 Learning Rate: 5e-5
 Epochs: 2 (curriculum learning)
 Optimizer: paged_adamw_8bit
-Training Time: ~15 minutes (A100)
+Training Time: ~10-15 minutes (A100)
+```
+
+### Llama-3.1-8B Configuration
+
+**Model:**
+```
+Base Model: meta-llama/Meta-Llama-3.1-8B-Instruct
+Parameters: 8 billion
+Quantization: 4-bit NF4
+Context Length: 512 tokens
+GPU Memory: ~20GB
+```
+
+**LoRA:**
+```
+Rank (r): 16
+Alpha: 32
+Dropout: 0.05
+Target Modules: ['q_proj', 'k_proj', 'v_proj', 'o_proj', 
+                 'gate_proj', 'up_proj', 'down_proj']
+Trainable Parameters: ~41.9M (0.52% of total)
+```
+
+**Training:**
+```
+Training Examples: 1000
+  - Easy: 300 (30%)
+  - Medium: 400 (40%)
+  - Hard: 300 (30%)
+Batch Size: 4 (effective 16)
+Learning Rate: 2e-4
+Epochs: 3 (curriculum learning)
+Optimizer: paged_adamw_8bit
+Training Time: ~15-20 minutes (A100)
 ```
 
 ---
 
 ## 💡 Key Innovations
 
-### 1. Adaptive RAG
+### SQLCoder-7B-2 Approach
+
+**1. Adaptive RAG**
 - Complexity-based retrieval
 - Skip RAG for easy queries (use baseline)
 - Use RAG for medium/hard queries
 - Reduces inference time by 30%
 
-### 2. Enhanced Retrieval
+**2. Enhanced Retrieval**
 - TF-IDF with bigrams
 - Pattern-specific boosting
 - Exact match: 10x boost
 - Substring match: 5x boost
 - Key phrase matching: 1.5x boost
 
-### 3. Curriculum Learning
+**3. Curriculum Learning**
 - Stage 1: Medium queries only
 - Stage 2: Medium + Hard queries
 - Prevents catastrophic forgetting
 - Maintains hard query performance
 
-### 4. Balanced Training
-- 70% medium (focus area)
-- 30% hard (prevent forgetting)
+**4. Balanced Training**
+- 73% medium (focus area)
+- 27% hard (prevent forgetting)
 - Extra emphasis on failing queries (3x repetition)
 - Prevents overfitting
+
+### Llama-3.1-8B Approach
+
+**1. Large-Scale Training Data**
+- 1000 programmatically generated examples
+- Covers wide variety of query patterns
+- Multiple variations per base query
+- Balanced difficulty distribution
+
+**2. Progressive Curriculum Learning**
+- Epoch 1: Easy only (build foundation)
+- Epoch 2: Easy + Medium (add complexity)
+- Epoch 3: All queries (full training)
+- Prevents catastrophic forgetting
+
+**3. Comprehensive LoRA**
+- 7 target modules (attention + MLP)
+- Higher parameter count (41.9M vs 16.8M)
+- More expressive fine-tuning
+- Better generalization
+
+---
+
+## 📊 Performance Comparison
+
+### Model Comparison
+
+| Model | Approach | Training Examples | Final Accuracy | Improvement |
+|-------|----------|-------------------|----------------|-------------|
+| **SQLCoder-7B-2** | 3-Stage (Baseline→RAG→FT) | 186 | **87.5%** | +9.4% |
+| **Llama-3.1-8B** | Direct Fine-Tuning | 1000 | **76.7%** | +56.7-63.4% |
+
+### Key Insights
+
+**SQLCoder-7B-2 Strengths:**
+- Higher final accuracy (87.5%)
+- Better baseline performance (78.1%)
+- More efficient (fewer training examples)
+- SQL-specific pre-training advantage
+- Excellent with RAG enhancement
+
+**Llama-3.1-8B Strengths:**
+- Massive improvement from baseline (+56.7-63.4%)
+- Larger training dataset (1000 examples)
+- More comprehensive LoRA (7 modules)
+- General-purpose model flexibility
+- Strong curriculum learning results
+
+**Recommendation:**
+- Use **SQLCoder-7B-2** for production SQL generation (higher accuracy, more efficient)
+- Use **Llama-3.1-8B** when you need a general-purpose model that can also handle SQL
 
 ---
 
 ## 🚀 Gradio Interface Features
 
-The notebook includes a fully functional Gradio web interface with:
+Both notebooks include fully functional Gradio web interfaces with:
 
 - **Real-time SQL Generation**: Enter natural language queries and get SQL instantly
-- **Technique Comparison**: Test 6 different prompting techniques
-- **RAG Toggle**: Enable/disable RAG to compare performance
+- **Technique Comparison**: Test multiple prompting techniques
+- **RAG Toggle**: Enable/disable RAG to compare performance (SQLCoder only)
 - **Query Library**: Pre-built examples across 5 categories
   - Orders & Sales
   - Customers
@@ -310,11 +446,11 @@ The notebook includes a fully functional Gradio web interface with:
   - Delivery
 - **Database Schema Viewer**: Browse table structures and relationships
 - **Results Visualization**: Automatic chart generation for query results
-- **Evaluation Metrics**: View complete 3-stage performance breakdown
+- **Evaluation Metrics**: View complete performance breakdown
 
 ### Launching Gradio
 
-The interface launches automatically at the end of the notebook and provides a public URL for sharing.
+The interface launches automatically at the end of each notebook and provides a public URL for sharing.
 
 ---
 
@@ -329,7 +465,7 @@ gradient_accumulation_steps = 16
 
 ### Slow Inference
 ```python
-# Reduce top_k
+# Reduce top_k (SQLCoder)
 examples = retrieve_examples(question, top_k=2)
 
 # Reduce max_new_tokens
@@ -345,13 +481,19 @@ training_data = generate_more_examples()
 num_train_epochs = 3
 ```
 
+### HuggingFace Token Error (Llama)
+```python
+# Add HF_TOKEN to Colab Secrets
+# Secrets → Add new secret → Key: HF_TOKEN, Value: your_token
+```
+
 ---
 
 ## 📊 Dataset
 
 **Olist Brazilian E-Commerce Dataset**
 - Source: [Kaggle](https://www.kaggle.com/olistbr/brazilian-ecommerce)
-- Tables: 7 (customers, orders, products, payments, reviews, sellers, order_items)
+- Tables: 7-8 (depending on implementation)
 - Rows: 100,000+ orders
 - Time period: 2016-2018
 
@@ -359,11 +501,12 @@ num_train_epochs = 3
 ```sql
 customers (customer_id, customer_state, customer_city)
 orders (order_id, customer_id, order_status, order_purchase_timestamp)
-order_items (order_id, product_id, seller_id, price)
-products (product_id, product_category_name)
+order_items (order_id, product_id, seller_id, price, freight_value)
+products (product_id, product_category_name, product_weight_g)
 order_payments (order_id, payment_type, payment_value)
 order_reviews (order_id, review_score)
 sellers (seller_id, seller_state, seller_city)
+geolocation (geolocation_zip_code_prefix, geolocation_lat, geolocation_lng)
 ```
 
 ---
@@ -372,6 +515,7 @@ sellers (seller_id, seller_state, seller_city)
 
 **Models**
 - [SQLCoder-7B-2](https://huggingface.co/defog/sqlcoder-7b-2) - Defog.ai
+- [Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) - Meta
 - [Transformers](https://huggingface.co/docs/transformers) - Hugging Face
 
 **Techniques**
@@ -393,12 +537,16 @@ MIT License
 
 ---
 
+## 🙏 Acknowledgments
 
 - Defog.ai for SQLCoder model
+- Meta for Llama-3.1-8B model
 - Hugging Face for transformers library
 - Olist for the e-commerce dataset
 - Google Colab for GPU resources
-=======
-# QueryCraft-AI
-Intelligent Natural Language to SQL Translation
->>>>>>> 002a1679880dcb59be06960bc967f33bee16e31f
+
+---
+
+## 📧 Contact
+
+For questions or issues, please open an issue in this repository.
