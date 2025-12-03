@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # NL2SQL: Natural Language to SQL Translation System
 
 A comprehensive implementation of Natural Language to SQL translation using SQLCoder-7B-2 with Enhanced RAG and LoRA Fine-Tuning. This project demonstrates a systematic 3-stage approach achieving 87.5% accuracy on the Olist Brazilian E-Commerce dataset.
