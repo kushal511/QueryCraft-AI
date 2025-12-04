@@ -2,6 +2,12 @@
 
 A comprehensive implementation of Natural Language to SQL translation using two different approaches: **SQLCoder-7B-2** with RAG and Fine-Tuning, and **Llama-3.1-8B-Instruct** with LoRA Fine-Tuning. This project demonstrates systematic evaluation and optimization techniques for SQL generation.
 
+## 🎥 Demo Video
+
+[![NL2SQL Demo](https://img.youtube.com/vi/WNHaknWGSWw/maxresdefault.jpg)](https://youtu.be/WNHaknWGSWw)
+
+**Watch the full demonstration:** [NL2SQL System Demo](https://youtu.be/WNHaknWGSWw)
+
 ---
 
 ## 📊 Project Overview
@@ -545,4 +551,8 @@ MIT License
 - Olist for the e-commerce dataset
 - Google Colab for GPU resources
 
+---
 
+## 📧 Contact
+
+For questions or issues, please open an issue in this repository.
