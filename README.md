@@ -4,9 +4,17 @@ A comprehensive implementation of Natural Language to SQL translation using two 
 
 ## 🎥 Demo Video
 
-[![NL2SQL Demo](https://img.youtube.com/vi/WNHaknWGSWw/maxresdefault.jpg)](https://youtu.be/WNHaknWGSWw)
+<div align="center">
 
-**Watch the full demonstration:** [NL2SQL System Demo](https://youtu.be/WNHaknWGSWw)
+### 🎬 [**Watch the Full NL2SQL System Demo**](https://youtu.be/WNHaknWGSWw)
+
+[![Watch Demo](./demo-thumbnail.png)](https://youtu.be/WNHaknWGSWw)
+
+**[▶️ Click to Watch on YouTube](https://youtu.be/WNHaknWGSWw)**
+
+*See the system in action: 87.5% accuracy • Real-time SQL generation • Interactive Gradio interface*
+
+</div>
 
 ---
 
